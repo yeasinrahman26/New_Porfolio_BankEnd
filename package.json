@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "seed:admin": "node seeds/seedAdmin.js"
+    "seed:admin": "node seeds/seedAdmin.js",
+    "seed:projects": "node seeds/seedProjects.js",
+    "seed:skills": "node seeds/seedSkills.js",
+    "seed:all": "node seeds/seedAdmin.js && node seeds/seedProjects.js && node seeds/seedSkills.js"
   },
   "keywords": [],
   "author": "",
