@@ -7,9 +7,6 @@ const connectDB = require("./config/db");
 // Load environment variables
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
-
 const app = express();
 
 // ---------------------
@@ -20,7 +17,7 @@ const app = express();
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:3000",
-    credentials: true, // required for httpOnly cookies
+    credentials: true,
   }),
 );
 
@@ -32,6 +29,22 @@ app.use(express.urlencoded({ extended: true }));
 
 // Parse cookies
 app.use(cookieParser());
+
+// ---------------------
+// DB CONNECTION MIDDLEWARE (Serverless-safe)
+// ---------------------
+// Ensures DB is connected before every request
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Database connection failed",
+    });
+  }
+});
 
 // ---------------------
 // ROUTES
@@ -47,10 +60,10 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// API routes (will be added in subsequent steps)
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/projects', require('./routes/projectRoutes'));
-app.use('/api/skills', require('./routes/skillRoutes'));
+// API routes
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/projects", require("./routes/projectRoutes"));
+app.use("/api/skills", require("./routes/skillRoutes"));
 
 // ---------------------
 // 404 HANDLER
@@ -82,11 +95,17 @@ app.use((err, req, res, next) => {
 });
 
 // ---------------------
-// START SERVER
+// START SERVER (Local only, NOT on Vercel)
 // ---------------------
-const PORT = process.env.PORT || 5000;
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(
+      `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`,
+    );
+    console.log(`Health check: http://localhost:${PORT}/api/health`);
+  });
+}
 
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/api/health`);
-});
+// ✅ Export for Vercel
+module.exports = app;

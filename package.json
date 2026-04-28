@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "build": "echo 'No build step required'",
     "seed:admin": "node seeds/seedAdmin.js",
     "seed:projects": "node seeds/seedProjects.js",
     "seed:skills": "node seeds/seedSkills.js",
